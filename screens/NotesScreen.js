@@ -35,7 +35,7 @@ useEffect(() => {
   return () => {
     unsubscribe()
   }
-}, []);
+},[]);
 
   // This is to set up the top right button
   useEffect(() => {
