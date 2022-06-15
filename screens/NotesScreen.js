@@ -20,10 +20,17 @@ export default function NotesScreen({ navigation, route }) {
 
 useEffect(() => {
   const unsubscribe = todoCollection
-    .onSnapshot((collection) => {
-      const updatedNotes = collection.docs.map((doc) => doc.data())
+    .orderBy("created").onSnapshot((collection) => {
+      const updatedNotes = collection.docs.map((doc) => {
+      const noteObject = {
+        ...doc.data(),
+        id: doc.id,
+      };
+      console.log(noteObject);
+      return noteObject;
+    });
       setNotes(updatedNotes)
-    })
+    });
 
   return () => {
     unsubscribe()
@@ -55,7 +62,8 @@ useEffect(() => {
       const newNote = {
         title: route.params.text,
         done: false,
-        id: notes.length.toString(),
+        //id: notes.length.toString(),
+        created: Date.now().toString(),
       };
       todoCollection.add(newNote);
       
@@ -72,11 +80,7 @@ useEffect(() => {
     console.log("Deleting " + id);
 
     todoCollection
-    .where("id", '==', id)
-    .get()
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => doc.ref.delete())
-    })
+   .doc(id).delete();
 
 
 
