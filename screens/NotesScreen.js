@@ -10,15 +10,16 @@ import { Ionicons } from "@expo/vector-icons";
 import firebase from "../database/firebaseDB"
 
 
+const todoCollection = firebase
+  .firestore()
+  .collection('todos');
 export default function NotesScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
 
 
 
 useEffect(() => {
-  const unsubscribe = firebase
-    .firestore()
-    .collection('todos')
+  const unsubscribe = todoCollection
     .onSnapshot((collection) => {
       const updatedNotes = collection.docs.map((doc) => doc.data())
       setNotes(updatedNotes)
@@ -56,7 +57,7 @@ useEffect(() => {
         done: false,
         id: notes.length.toString(),
       };
-      firebase.firestore().collection('todos').add(newNote);
+      todoCollection.add(newNote);
       
     }
   }, [route.params?.text]);
@@ -70,9 +71,7 @@ useEffect(() => {
   function deleteNote(id) {
     console.log("Deleting " + id);
 
-    firebase
-    .firestore()
-    .collection('todos')
+    todoCollection
     .where("id", '==', id)
     .get()
     .then((querySnapshot) => {
