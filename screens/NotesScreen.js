@@ -15,6 +15,20 @@ export default function NotesScreen({ navigation, route }) {
 
 
 
+useEffect(() => {
+  const unsubscribe = firebase
+    .firestore()
+    .collection('todos')
+    .onSnapshot((collection) => {
+      const updatedNotes = collection.docs.map((doc) => doc.data())
+      setNotes(updatedNotes)
+    })
+
+  return () => {
+    unsubscribe()
+  }
+}, []);
+
   // This is to set up the top right button
   useEffect(() => {
     navigation.setOptions({
@@ -42,9 +56,11 @@ export default function NotesScreen({ navigation, route }) {
         done: false,
         id: notes.length.toString(),
       };
-      setNotes([...notes, newNote]);
+      firebase.firestore().collection('todos').add(newNote);
+      
     }
   }, [route.params?.text]);
+
 
   function addNote() {
     navigation.navigate("Add Screen");
@@ -53,6 +69,18 @@ export default function NotesScreen({ navigation, route }) {
   // This deletes an individual note
   function deleteNote(id) {
     console.log("Deleting " + id);
+
+    firebase
+    .firestore()
+    .collection('todos')
+    .where("id", '==', id)
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => doc.ref.delete())
+    })
+
+
+
     // To delete that item, we filter out the item we don't want
     setNotes(notes.filter((item) => item.id !== id));
   }
